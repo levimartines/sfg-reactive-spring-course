@@ -4,8 +4,10 @@ import guru.springframework.sfgrestbrewery.services.BeerService;
 import guru.springframework.sfgrestbrewery.web.model.BeerDto;
 import guru.springframework.sfgrestbrewery.web.model.BeerPagedList;
 import guru.springframework.sfgrestbrewery.web.model.BeerStyleEnum;
+import reactor.core.publisher.Mono;
 
-import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import lombok.RequiredArgsConstructor;
 
@@ -14,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -35,11 +38,11 @@ public class BeerController {
     private final BeerService beerService;
 
     @GetMapping(produces = {"application/json"}, path = "beer")
-    public ResponseEntity<BeerPagedList> listBeers(@RequestParam(value = "pageNumber", required = false) Integer pageNumber,
-                                                   @RequestParam(value = "pageSize", required = false) Integer pageSize,
-                                                   @RequestParam(value = "beerName", required = false) String beerName,
-                                                   @RequestParam(value = "beerStyle", required = false) BeerStyleEnum beerStyle,
-                                                   @RequestParam(value = "showInventoryOnHand", required = false) Boolean showInventoryOnHand) {
+    public ResponseEntity<Mono<BeerPagedList>> listBeers(@RequestParam(value = "pageNumber", required = false) Integer pageNumber,
+                                                         @RequestParam(value = "pageSize", required = false) Integer pageSize,
+                                                         @RequestParam(value = "beerName", required = false) String beerName,
+                                                         @RequestParam(value = "beerStyle", required = false) BeerStyleEnum beerStyle,
+                                                         @RequestParam(value = "showInventoryOnHand", required = false) Boolean showInventoryOnHand) {
 
         if (showInventoryOnHand == null) {
             showInventoryOnHand = false;
@@ -53,49 +56,60 @@ public class BeerController {
             pageSize = DEFAULT_PAGE_SIZE;
         }
 
-        BeerPagedList beerList = beerService.listBeers(beerName, beerStyle, PageRequest.of(pageNumber, pageSize), showInventoryOnHand);
-
-        return new ResponseEntity<>(beerList, HttpStatus.OK);
+        Mono<BeerPagedList> beerList = beerService.listBeers(beerName, beerStyle, PageRequest.of(pageNumber, pageSize), showInventoryOnHand);
+        return ResponseEntity.ok(beerList);
     }
 
     @GetMapping("beer/{beerId}")
-    public ResponseEntity<BeerDto> getBeerById(@PathVariable("beerId") UUID beerId,
-                                               @RequestParam(value = "showInventoryOnHand", required = false) Boolean showInventoryOnHand) {
+    public ResponseEntity<Mono<BeerDto>> getBeerById(@PathVariable("beerId") Integer beerId,
+                                                     @RequestParam(value = "showInventoryOnHand", required = false) Boolean showInventoryOnHand) {
         if (showInventoryOnHand == null) {
             showInventoryOnHand = false;
         }
 
-        return new ResponseEntity<>(beerService.getById(beerId, showInventoryOnHand), HttpStatus.OK);
+        Mono<BeerDto> beerDtoMono = beerService.getById(beerId, showInventoryOnHand)
+            .defaultIfEmpty(new BeerDto())
+            .doOnNext(beerDto -> {
+                if (beerDto.getId() == null) {
+                    throw new NotFoundException();
+                }
+            });
+        return ResponseEntity.ok(beerDtoMono);
     }
 
     @GetMapping("beerUpc/{upc}")
-    public ResponseEntity<BeerDto> getBeerByUpc(@PathVariable("upc") String upc) {
+    public ResponseEntity<Mono<BeerDto>> getBeerByUpc(@PathVariable("upc") String upc) {
         return new ResponseEntity<>(beerService.getByUpc(upc), HttpStatus.OK);
     }
 
     @PostMapping(path = "beer")
     public ResponseEntity<BeerDto> saveNewBeer(@RequestBody @Validated BeerDto beerDto) {
 
-        BeerDto savedBeer = beerService.saveNewBeer(beerDto);
-
+        AtomicInteger newBeerId = new AtomicInteger();
+        beerService.saveNewBeer(beerDto).subscribe(newBeer -> newBeerId.set(newBeer.getId()));
         return ResponseEntity
             .created(UriComponentsBuilder
-                .fromHttpUrl("http://api.springframework.guru/api/v1/beer/" + savedBeer.getId().toString())
+                .fromHttpUrl("http://api.springframework.guru/api/v1/beer/" + newBeerId.get())
                 .build().toUri())
             .build();
     }
 
     @PutMapping("beer/{beerId}")
-    public ResponseEntity<BeerDto> updateBeerById(@PathVariable("beerId") UUID beerId, @RequestBody @Validated BeerDto beerDto) {
-        return new ResponseEntity<>(beerService.updateBeer(beerId, beerDto), HttpStatus.NO_CONTENT);
+    public ResponseEntity<Void> updateBeerById(@PathVariable("beerId") Integer beerId, @RequestBody @Validated BeerDto beerDto) {
+        AtomicBoolean beerExists = new AtomicBoolean(false);
+        beerService.updateBeer(beerId, beerDto).subscribe(savedDto -> beerExists.set(savedDto.getId() != null));
+        return beerExists.get() ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
     }
 
     @DeleteMapping("beer/{beerId}")
-    public ResponseEntity<Void> deleteBeerById(@PathVariable("beerId") UUID beerId) {
-
+    public ResponseEntity<Void> deleteBeerById(@PathVariable("beerId") Integer beerId) {
         beerService.deleteBeerById(beerId);
-
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @ExceptionHandler
+    ResponseEntity<Void> handleNotFoundException(NotFoundException exception) {
+        return ResponseEntity.notFound().build();
     }
 
 }

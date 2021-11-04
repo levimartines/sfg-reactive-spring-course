@@ -1,6 +1,7 @@
 package guru.springframework.sfgrestbrewery.web.model;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
@@ -19,7 +20,7 @@ import javax.validation.constraints.Null;
 public class BeerDto {
 
     @Null
-    private UUID id;
+    private Integer id;
 
     @NotBlank
     private String beerName;
@@ -33,6 +34,6 @@ public class BeerDto {
 
     private Integer quantityOnHand;
 
-    private OffsetDateTime createdDate;
-    private OffsetDateTime lastUpdatedDate;
+    private LocalDateTime createdDate;
+    private LocalDateTime lastUpdatedDate;
 }
