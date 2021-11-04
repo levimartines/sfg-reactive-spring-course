@@ -3,13 +3,11 @@ package guru.springframework.sfgrestbrewery.services;
 import guru.springframework.sfgrestbrewery.web.model.BeerDto;
 import guru.springframework.sfgrestbrewery.web.model.BeerPagedList;
 import guru.springframework.sfgrestbrewery.web.model.BeerStyleEnum;
-import org.springframework.data.domain.PageRequest;
 
 import java.util.UUID;
 
-/**
- * Created by jt on 2019-04-20.
- */
+import org.springframework.data.domain.PageRequest;
+
 public interface BeerService {
     BeerPagedList listBeers(String beerName, BeerStyleEnum beerStyle, PageRequest pageRequest, Boolean showInventoryOnHand);
 
