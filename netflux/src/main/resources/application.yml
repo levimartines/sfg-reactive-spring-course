@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: netflux
+  data:
+    mongodb:
+      uri: mongodb://127.0.0.1:27017/netflux?directConnection=true&serverSelectionTimeoutMS=2000
+  profiles:
+    active: dev
