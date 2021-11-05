@@ -14,9 +14,14 @@ public interface BeerService {
 
     Mono<BeerDto> saveNewBeer(BeerDto beerDto);
 
+    Mono<BeerDto> saveNewBeer(Mono<BeerDto> beerDto);
+
     Mono<BeerDto> updateBeer(Integer beerId, BeerDto beerDto);
 
     Mono<BeerDto> getByUpc(String upc);
 
     void deleteBeerById(Integer beerId);
+
+    Mono<Void> reactiveDeleteById(Integer beerId);
+
 }
