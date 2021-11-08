@@ -1,10 +1,10 @@
-package guru.springframework.streamingstockquoteservice;
+package guru.springframework.rabbit.rabbitstockquoteservice;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class StreamingStockQuoteServiceApplicationTests {
+class RabbitStockQuoteServiceApplicationTests {
 
     @Test
     void contextLoads() {

@@ -1,14 +1,21 @@
-package guru.springframework.streamingstockquoteservice.model;
+package guru.springframework.rabbit.rabbitstockquoteservice.model;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.Instant;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
+/**
+ * Created by jt on 4/17/21.
+ */
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Quote {
 
     private static final MathContext MATH_CONTEXT = new MathContext(2);

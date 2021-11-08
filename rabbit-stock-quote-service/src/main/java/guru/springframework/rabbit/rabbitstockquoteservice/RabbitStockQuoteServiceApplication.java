@@ -1,13 +1,13 @@
-package guru.springframework.streamingstockquoteservice;
+package guru.springframework.rabbit.rabbitstockquoteservice;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class StreamingStockQuoteServiceApplication {
+public class RabbitStockQuoteServiceApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(StreamingStockQuoteServiceApplication.class, args);
+        SpringApplication.run(RabbitStockQuoteServiceApplication.class, args);
     }
 
 }

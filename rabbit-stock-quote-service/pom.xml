@@ -8,15 +8,32 @@
         <version>2.5.6</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>guru.springframework</groupId>
-    <artifactId>streaming-stock-quote-service</artifactId>
+    <groupId>guru.springframework.rabbit</groupId>
+    <artifactId>rabbit-stock-quote-service</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>streaming-stock-quote-service</name>
-    <description>Demo project for Spring Boot</description>
+    <name>rabbit-stock-quote-service</name>
+    <description>Reactive RabbitMQ Stock Quote Service</description>
     <properties>
         <java.version>11</java.version>
     </properties>
+
+    <developers>
+        <developer>
+            <name>John Thompson</name>
+            <organization>Spring Framework Guru</organization>
+            <url>https://springframework.guru</url>
+        </developer>
+    </developers>
+
     <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-amqp</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.projectreactor.rabbitmq</groupId>
+            <artifactId>reactor-rabbitmq</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webflux</artifactId>
@@ -35,6 +52,11 @@
         <dependency>
             <groupId>io.projectreactor</groupId>
             <artifactId>reactor-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.amqp</groupId>
+            <artifactId>spring-rabbit-test</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
